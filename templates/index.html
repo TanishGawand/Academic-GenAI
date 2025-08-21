@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Academia GenAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --onyx:#0B0B0D;
+      --graphite:#141217;
+      --umber:#1C130A;
+      --coffee:#2B2118;
+      --gold:#D4AF37;         /* metallic gold */
+      --pale-gold:#E8C547;    /* soft highlight gold */
+      --champagne:#F5E6C5;    /* body text on dark */
+      --bronze:#B87333;
+      --cognac:#A97142;
+    }
+    body{ font-family:'Inter',sans-serif; }
+
+    /* Premium background: layered radial glows over deep charcoal/umber */
+    .premium-bg{
+      background:
+        radial-gradient(1000px 500px at 20% 10%, rgba(212,175,55,.12) 0%, transparent 60%),
+        radial-gradient(800px 400px at 80% 30%, rgba(184,115,51,.10) 0%, transparent 55%),
+        linear-gradient(135deg, var(--onyx) 0%, var(--graphite) 60%, var(--umber) 100%);
+      min-height:100vh;
+    }
+
+    /* Luxe glass */
+    .glass{
+      backdrop-filter: blur(22px);
+      background: rgba(20,17,13,0.60);
+      border: 1px solid rgba(212,175,55,0.25);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.55),
+        0 0 0 1px rgba(212,175,55,0.15) inset;
+    }
+
+    /* Gold headline shimmer (subtle) */
+    .shimmer{
+      background: linear-gradient(90deg, var(--pale-gold), var(--gold), var(--pale-gold));
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 6s ease-in-out infinite;
+    }
+    @keyframes shine{
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    /* Buttons */
+    .btn-gold{
+      background: linear-gradient(180deg, var(--pale-gold), var(--gold));
+      color:#0B0B0D;
+      border:1px solid rgba(212,175,55,0.55);
+      box-shadow: 0 10px 24px rgba(232,197,71,.18), 0 1px 0 rgba(255,255,255,.15) inset;
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn-gold:hover{
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(232,197,71,.22), 0 1px 0 rgba(255,255,255,.25) inset;
+    }
+
+    .btn-outline{
+      background: rgba(20,17,13,.6);
+      color: var(--champagne);
+      border:1px solid rgba(212,175,55,0.35);
+      box-shadow: 0 8px 20px rgba(0,0,0,.4);
+      transition: border-color .2s ease, transform .15s ease, color .2s ease, background .2s ease;
+    }
+    .btn-outline:hover{
+      border-color: rgba(232,197,71,0.65);
+      color: #FFF6DA;
+      transform: translateY(-1px);
+      background: rgba(20,17,13,.72);
+    }
+
+    .btn-bronze{
+      background: linear-gradient(180deg, #C08A3E, var(--cognac));
+      color:#0B0B0D;
+      border:1px solid rgba(184,115,51,0.55);
+      box-shadow: 0 10px 24px rgba(192,138,62,.18);
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn-bronze:hover{
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(192,138,62,.22);
+    }
+
+    /* Inputs */
+    .field{
+      background: rgba(10,9,8,.7);
+      color: var(--champagne);
+      border:1px solid rgba(212,175,55,0.25);
+      box-shadow: inset 0 1px 4px rgba(0,0,0,.55);
+    }
+    .field::placeholder{ color:#9C8F79; }
+    .field:focus{
+      outline:none;
+      border-color: rgba(232,197,71,0.6);
+      box-shadow:
+        0 0 0 3px rgba(232,197,71,0.15),
+        inset 0 1px 4px rgba(0,0,0,.55);
+    }
+
+    /* Nav link hover */
+    .nav-link{ color: var(--champagne); }
+    .nav-link:hover{ color:#FFF2C2; }
+
+    /* Response box */
+    .panel{
+      background: rgba(12,10,9,.6);
+      border:1px solid rgba(212,175,55,0.22);
+      color: var(--champagne);
+    }
+  </style>
+</head>
+<body class="premium-bg flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="bg-black/60 text-[var(--champagne)] px-6 py-4 flex justify-between items-center shadow-lg border-b border-[rgba(212,175,55,0.25)]">
+    <div class="text-xl font-bold flex items-center space-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+        <path fill="var(--gold)" d="M10 2L2 6l8 4 8-4-8-4zm0 5.5L3.5 6 10 9.5 16.5 6 10 7.5zM2 8v6l8 4 8-4V8l-8 4-8-4z"/>
+      </svg>
+      <span class="tracking-wide" style="color:var(--pale-gold)">Academia GenAI</span>
+    </div>
+    <div class="space-x-6 text-sm font-semibold">
+      <a href="/" class="nav-link transition">HOME</a>
+      <a href="/create-paper" class="nav-link transition">CREATE PAPER</a>
+      <a href="/myspace" class="nav-link transition">MYSPACE</a>
+      <a href="/plagirism" class="nav-link transition">PLAGIARISM</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="glass text-white rounded-2xl shadow-2xl p-10 text-center max-w-2xl w-full">
+      <div class="mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" viewBox="0 0 20 20">
+          <path fill="var(--pale-gold)" d="M10 2L2 6l8 4 8-4-8-4zm0 5.5L3.5 6 10 9.5 16.5 6 10 7.5zM2 8v6l8 4 8-4V8l-8 4-8-4z"/>
+        </svg>
+      </div>
+      <h1 class="text-4xl font-extrabold mb-3 shimmer">Welcome to Academia GenAI</h1>
+      <p class="text-[var(--champagne)]/90 text-lg mb-8">Your AI-powered academic assistant for writing, research & originality checking.</p>
+
+      <!-- Buttons -->
+      <div class="flex flex-wrap justify-center gap-4 mb-8">
+        <a href="/create-paper" class="btn-gold font-semibold px-6 py-3 rounded-xl">📄 CREATE PAPER</a>
+        <a href="/myspace" class="btn-outline font-semibold px-6 py-3 rounded-xl">🗃️ MYSPACE</a>
+        <a href="/plagirism" class="btn-bronze font-semibold px-6 py-3 rounded-xl inline-block">🧪 PLAGIARISM</a>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="text-left">
+        <textarea id="question" class="field w-full rounded-lg p-3 mb-4 resize-none" rows="3" placeholder="💬 Ask an academic question (e.g., Show me papers from 2022)..."></textarea>
+        <button onclick="askQuestion()" class="btn-gold font-bold px-6 py-2 rounded">Ask</button>
+      </div>
+
+      <!-- Answer Area -->
+      <div id="response" class="panel mt-6 text-left text-sm p-4 rounded-lg overflow-y-auto max-h-60"></div>
+    </div>
+  </main>
+
+  <!-- Chatbot Modal -->
+  <div id="chatbot-modal" class="fixed bottom-20 right-6 glass rounded-xl shadow-2xl w-80 hidden flex-col overflow-hidden z-50">
+    <div class="px-4 py-2 font-bold text-sm flex justify-between items-center" style="background:linear-gradient(180deg,var(--pale-gold),var(--gold)); color:#0B0B0D;">
+      <span>Academia Chatbot</span>
+      <button onclick="toggleChatbot()" class="text-black text-lg">&times;</button>
+    </div>
+    <div id="chatbot-messages" class="p-4 h-60 overflow-y-auto text-sm text-[var(--champagne)] bg-transparent"></div>
+    <div class="flex border-t border-[rgba(212,175,55,0.25)]">
+      <input id="chatbot-input" type="text" placeholder="Ask something..." class="field flex-grow p-2 text-sm rounded-none">
+      <button onclick="sendChatbotMessage()" class="btn-outline px-4">Send</button>
+    </div>
+  </div>
+
+  <!-- Chatbot Button -->
+  <button onclick="toggleChatbot()" class="fixed bottom-6 right-6 btn-gold font-semibold px-6 py-3 rounded-full shadow-lg transition">
+    💬 Chatbot
+  </button>
+
+  <script>
+    async function askQuestion() {
+      const question = document.getElementById("question").value.trim();
+      const responseDiv = document.getElementById("response");
+
+      if (!question) {
+        responseDiv.innerHTML = "<span style='color:#ffb4b4'>❌ Please enter a question.</span>";
+        return;
+      }
+      responseDiv.innerHTML = "⏳ Generating response...";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        responseDiv.innerHTML = data.answer || "⚠️ No response received.";
+      } catch (err) {
+        responseDiv.innerHTML = "❌ Error: " + err.message;
+      }
+    }
+
+    function toggleChatbot() {
+      const modal = document.getElementById("chatbot-modal");
+      modal.classList.toggle("hidden");
+    }
+
+    async function sendChatbotMessage() {
+      const input = document.getElementById("chatbot-input");
+      const messages = document.getElementById("chatbot-messages");
+      const question = input.value.trim();
+      if (!question) return;
+
+      messages.innerHTML += `<div class="mb-2"><strong style="color:var(--pale-gold)">You:</strong> <span style="color:var(--champagne)">${question}</span></div>`;
+      input.value = "";
+      messages.innerHTML += `<div class="mb-2" style="color:#8f8469">⏳ Bot is thinking...</div>`;
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        messages.innerHTML += `<div class="mb-2"><strong style="color:var(--pale-gold)">Bot:</strong> <span style="color:var(--champagne)">${data.answer}</span></div>`;
+      } catch (err) {
+        messages.innerHTML += `<div class="mb-2" style="color:#ffb4b4">❌ Error: ${err.message}</div>`;
+      }
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>

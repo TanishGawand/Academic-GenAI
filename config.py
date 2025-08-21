@@ -1,0 +1,1 @@
+API_KEY = "gsk-yC4luc60jLqpHT3Kzb6DWGdyb3FY9kjLoiEdjoQpDhAaKOXgPLto"

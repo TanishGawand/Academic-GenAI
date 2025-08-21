@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MySpace | Academia GenAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; background-color:#0B0B0D; color:#F5E6C5; }
+  .glass { backdrop-filter: blur(18px); background: rgba(20,17,13,.6); border:1px solid rgba(212,175,55,.22); border-radius:1rem; padding:1rem; }
+  a { color:#D4AF37; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-[#0D0D0D] via-[#1A1A1A] to-[#2C1810] min-h-screen flex flex-col text-white">
+
+  <!-- Navbar -->
+  <nav class="bg-black bg-opacity-60 text-white px-6 py-4 flex justify-between items-center shadow-lg border-b border-[#FFD700]/20">
+    <div class="text-xl font-bold flex items-center space-x-2 text-[#FFD700]">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 2L2 6l8 4 8-4-8-4zm0 5.5L3.5 6 10 9.5 16.5 6 10 7.5zM2 8v6l8 4 8-4V8l-8 4-8-4z" />
+      </svg>
+      <span>Academia GenAI</span>
+    </div>
+    <div class="space-x-6 text-sm font-semibold">
+      <a href="/" class="hover:text-[#FFD700] transition">HOME</a>
+      <a href="/create-paper" class="hover:text-[#FFD700] transition">CREATE PAPER</a>
+      <a href="/myspace" class="hover:text-[#FFD700] transition">MYSPACE</a>
+      <a href="/plagiarism" class="hover:text-[#FFD700] transition">PLAGIARISM</a>
+    </div>
+  </nav>
+  <h1 class="text-2xl font-bold mb-6"><br>📚 My Saved Papers</h1>
+  <div id="papersList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+<script>
+async function fetchPapers() {
+  try {
+    const res = await fetch("/get-papers");
+    const papers = await res.json();
+    const container = document.getElementById("papersList");
+    container.innerHTML = "";
+
+    if (papers.length === 0) {
+      container.innerHTML = "<p>No papers saved yet.</p>";
+      return;
+    }
+
+    papers.forEach(paper => {
+      const div = document.createElement("div");
+      div.className = "glass p-4";
+      div.innerHTML = `
+        <h2 class="font-bold text-lg">${paper.title}</h2>
+        <p class="text-sm opacity-80 mb-2">Authors: ${paper.authors || "N/A"}</p>
+        <p class="text-xs opacity-70 mb-2">Created: ${paper.created_at}</p>
+        <button onclick='downloadPaper(${paper.id})' class="bg-gold text-black px-3 py-1 rounded">⬇️ Download</button>
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    console.error(err);
+    document.getElementById("papersList").innerHTML = "<p>Error fetching papers.</p>";
+  }
+}
+
+async function downloadPaper(id) {
+  try {
+    const res = await fetch("/get-papers");
+    const papers = await res.json();
+    const paper = papers.find(p => p.id === id);
+    if (!paper) return alert("Paper not found!");
+
+    const payload = {
+      title: paper.title,
+      authors: paper.authors,
+      sections: paper.sections,
+      format: "docx"
+    };
+
+    const downloadRes = await fetch("/download-paper", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const blob = await downloadRes.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${paper.title}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch(err) { console.error(err); alert("Error downloading paper!"); }
+}
+
+fetchPapers();
+</script>
+</body>
+</html>

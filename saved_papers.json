@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "title": "The Impact of Artificial Intelligence on Higher Education",
+    "sections": [
+      {
+        "title": "Abstract",
+        "content": "Artificial Intelligence (AI) is reshaping education by enabling personalized learning, smart tutoring, and automated assessments. It has the potential to make learning more inclusive and efficient. However, challenges such as data privacy, bias, and the role of teachers must be addressed to ensure AI benefits all learners."
+      },
+      {
+        "title": "Introduction",
+        "content": "Education is evolving rapidly with AI tools that adapt to students’ needs, support teachers, and enhance learning outcomes. While AI offers opportunities for innovation, it also raises concerns about ethics, equity, and overreliance on technology. This paper discusses both the benefits and risks of integrating AI into human education."
+      },
+      {
+        "title": "Methodology",
+        "content": ""
+      },
+      {
+        "title": "Results",
+        "content": ""
+      },
+      {
+        "title": "Discussion",
+        "content": ""
+      },
+      {
+        "title": "Conclusion",
+        "content": ""
+      },
+      {
+        "title": "References",
+        "content": ""
+      }
+    ],
+    "created_at": "2025-08-20 20:07:17"
+  }
+]

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Paper | Academia GenAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --onyx:#0B0B0D; --graphite:#141217; --umber:#2C1810; --gold:#D4AF37; --pale:#E8C547; --champ:#F5E6C5;
+    }
+    body{ font-family:'Inter',sans-serif; }
+    .bg-premium{
+      background:
+        radial-gradient(900px 400px at 20% 0%, rgba(212,175,55,.12) 0%, transparent 60%),
+        radial-gradient(700px 400px at 80% 20%, rgba(184,115,51,.10) 0%, transparent 55%),
+        linear-gradient(135deg, var(--onyx) 0%, var(--graphite) 55%, var(--umber) 100%);
+      min-height:100vh;
+    }
+    .glass{ backdrop-filter: blur(18px); background: rgba(20,17,13,.6); border:1px solid rgba(212,175,55,.22); }
+    .field{ background: rgba(10,9,8,.7); color: var(--champ); border:1px solid rgba(212,175,55,.25); }
+    .field::placeholder{ color:#9C8F79; }
+    .chip{ background: rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.3); color: var(--champ); }
+    .btn-gold{
+      background: linear-gradient(180deg, var(--pale), var(--gold)); color:#0B0B0D; border:1px solid rgba(212,175,55,.55);
+      box-shadow: 0 10px 24px rgba(232,197,71,.18);
+      transition: transform .15s ease, filter .2s ease;
+    }
+    .btn-gold:hover{ filter:brightness(1.05); transform:translateY(-1px); }
+    .btn-disabled{ opacity:0.5; cursor:not-allowed; }
+  </style>
+</head>
+<body class="bg-premium text-[var(--champ)]">
+  <!-- Navbar -->
+  <nav class="bg-black/60 text-[var(--champ)] px-6 py-4 flex justify-between items-center shadow-lg border-b border-[rgba(212,175,55,0.25)]">
+    <div class="text-xl font-bold flex items-center space-x-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20"><path fill="#D4AF37" d="M10 2L2 6l8 4 8-4-8-4zm0 5.5L3.5 6 10 9.5 16.5 6 10 7.5zM2 8v6l8 4 8-4V8l-8 4-8-4z"/></svg>
+      <span class="tracking-wide" style="color:#E8C547">Academia GenAI</span>
+    </div>
+    <div class="space-x-6 text-sm font-semibold">
+      <a href="/" class="hover:text-white transition">HOME</a>
+      <a href="/create-paper" class="hover:text-white transition">CREATE PAPER</a>
+      <a href="/myspace" class="nav-link transition">MYSPACE</a>
+      <a href="/plagirism" class="hover:text-white transition">PLAGIARISM</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="p-6">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-6">
+      <!-- Left: Meta -->
+      <aside class="glass rounded-2xl p-5 lg:col-span-1">
+        <h2 class="text-lg font-bold mb-3" style="color:#E8C547">Paper Details</h2>
+        <label class="block text-sm mb-1">Title</label>
+        <input id="paperTitle" class="field w-full rounded-lg p-2 mb-3" placeholder="Enter paper title">
+
+        <label class="block text-sm mb-1">Authors</label>
+        <input id="paperAuthors" class="field w-full rounded-lg p-2 mb-3" placeholder="Enter names of the authors">
+
+        <label class="block text-sm mb-1">Template</label>
+        <select id="paperTemplate" class="field w-full rounded-lg p-2 mb-4">
+          <option value="apa">APA</option>
+          <option value="ieee">IEEE</option>
+          <option value="plain">Plain</option>
+        </select>
+
+        <div class="flex gap-2 flex-wrap">
+          <span id="totalWords" class="chip text-xs px-2 py-1 rounded-md">0 words</span>
+          <span id="sectionCount" class="chip text-xs px-2 py-1 rounded-md">0 sections</span>
+        </div>
+
+        <hr class="my-4 border-[rgba(212,175,55,.25)]">
+
+        <div class="grid gap-2">
+          <button id="btnPreview" class="btn-gold rounded-lg px-3 py-2 text-sm">👁️ Preview</button>
+          <button id="btnClear" class="btn-gold rounded-lg px-3 py-2 text-sm">🧹 Clear All</button>
+        </div>
+      </aside>
+
+      <!-- Right: Sections -->
+      <section class="glass rounded-2xl p-5 lg:col-span-2">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold" style="color:#E8C547">Predefined Sections</h2>
+        </div>
+        <div id="sections" class="space-y-4"></div>
+      </section>
+    </div>
+
+    <!-- Preview Drawer -->
+    <div id="preview" class="max-w-6xl mx-auto mt-6 glass rounded-2xl p-5 hidden">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-lg font-bold" style="color:#E8C547">Preview</h3>
+        <button id="btnClosePreview" class="chip rounded-md px-3 py-1 text-sm">Close</button>
+      </div>
+
+      <!-- Preview Content -->
+      <div id="previewContent" class="prose prose-invert max-w-none"></div>
+
+      <!-- Download Options -->
+      <div class="flex gap-3 mt-4">
+        <select id="downloadFormat" class="field rounded-lg px-2 py-2">
+          <option value="docx">DOCX</option>
+          <option value="pdf">PDF</option>
+        </select>
+        <button id="btnDownload" class="btn-gold btn-disabled rounded-lg px-4 py-2 text-sm" disabled>
+          ⬇️ Download
+        </button>
+         <button id="btnSave" class="btn-bronze rounded-lg px-4 py-2 text-sm">💾 Save Paper</button>
+      </div>
+    </div>
+  </main>
+
+  <template id="sectionTemplate">
+    <div class="section glass rounded-xl p-4">
+      <label class="block text-sm mb-1">Section Title</label>
+      <input class="section-title field w-full rounded-md px-2 py-2 mb-2" />
+      <textarea class="section-content field w-full rounded-md p-3" rows="8" placeholder="Write content here..."></textarea>
+      <div class="flex gap-2 mt-2 text-xs">
+        <span class="chip rounded-md px-2 py-1">Words: <span class="word-count">0</span></span>
+        <span class="chip rounded-md px-2 py-1">Chars: <span class="char-count">0</span></span>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const DEFAULT_SECTIONS = ["Abstract","Introduction","Methodology","Results","Discussion","Conclusion","References"];
+    const $ = (id) => document.getElementById(id);
+    const sectionsWrap = $("sections");
+    const template = $("sectionTemplate");
+
+    const state = { title:"", authors:"", template:"apa", sections:[] };
+
+    function renderSections() {
+      sectionsWrap.innerHTML = "";
+      state.sections.forEach((sec) => {
+        const node = template.content.firstElementChild.cloneNode(true);
+        const titleEl = node.querySelector(".section-title");
+        const contentEl = node.querySelector(".section-content");
+        const wordEl = node.querySelector(".word-count");
+        const charEl = node.querySelector(".char-count");
+
+        titleEl.value = sec.title;
+        contentEl.value = sec.content || "";
+
+        titleEl.addEventListener("input", () => { sec.title = titleEl.value; updateMeta(); });
+        contentEl.addEventListener("input", () => {
+          sec.content = contentEl.value;
+          const words = (sec.content.trim().match(/\b\w+\b/g) || []).length;
+          wordEl.textContent = words;
+          charEl.textContent = sec.content.length;
+          updateMeta();
+        });
+
+        // initialize counters
+        const words = (sec.content.trim().match(/\b\w+\b/g) || []).length;
+        wordEl.textContent = words;
+        charEl.textContent = sec.content.length;
+
+        sectionsWrap.appendChild(node);
+      });
+
+      $("sectionCount").textContent = `${state.sections.length} sections`;
+      updateMeta();
+    }
+
+    function updateMeta() {
+      const totalWords = state.sections.reduce((sum, s) => {
+        const m = (s.content || "").trim().match(/\b\w+\b/g);
+        return sum + (m ? m.length : 0);
+      }, 0);
+      $("totalWords").textContent = `${totalWords} words`;
+    }
+
+    function init() {
+      state.sections = DEFAULT_SECTIONS.map(t => ({ title:t, content:"" }));
+      renderSections();
+
+      $("paperTitle").addEventListener("input", e => state.title = e.target.value);
+      $("paperAuthors").addEventListener("input", e => state.authors = e.target.value);
+      $("paperTemplate").addEventListener("change", e => state.template = e.target.value);
+
+      $("btnPreview").onclick = showPreview;
+      $("btnClosePreview").onclick = () => $("preview").classList.add("hidden");
+      $("btnClear").onclick = clearAll;
+    }
+
+    function clearAll() {
+      $("paperTitle").value = "";
+      $("paperAuthors").value = "";
+      $("paperTemplate").value = "apa";
+      state.title = ""; state.authors = ""; state.template = "apa";
+      state.sections = DEFAULT_SECTIONS.map(t => ({ title:t, content:"" }));
+      renderSections();
+      $("preview").classList.add("hidden");
+      disableDownload();
+    }
+
+    function showPreview() {
+      const html = `
+        <h1 class="text-2xl font-extrabold mb-2" style="color:#E8C547">${escapeHTML(state.title || "Untitled")}</h1>
+        ${state.authors ? `<p class="mb-4 opacity-80">${escapeHTML(state.authors)}</p>` : ""}
+        ${state.sections.map(sec => `
+          <h2 class="text-xl font-bold mt-4 mb-2" style="color:#D4AF37">${escapeHTML(sec.title)}</h2>
+          <p class="leading-7 whitespace-pre-wrap">${escapeHTML(sec.content || "")}</p>
+        `).join("")}
+      `;
+      $("previewContent").innerHTML = html;
+      $("preview").classList.remove("hidden");
+      enableDownload();
+    }
+
+    function enableDownload() {
+      const btn = $("btnDownload");
+      btn.disabled = false;
+      btn.classList.remove("btn-disabled");
+    }
+
+    function disableDownload() {
+      const btn = $("btnDownload");
+      btn.disabled = true;
+      btn.classList.add("btn-disabled");
+    }
+
+    function escapeHTML(str) {
+      return (str || "").replace(/[&<>"']/g, s => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
+    }
+
+    init();
+
+    $("btnDownload").onclick = async () => {
+  if ($("btnDownload").disabled) return;
+  const format = $("downloadFormat").value;
+
+  const payload = {
+    title: state.title,
+    authors: state.authors,
+    template: state.template,
+    sections: state.sections,
+    format: format
+  };
+
+  const res = await fetch("/download-paper", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `paper.${format}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+// ✅ MOVE THIS OUTSIDE
+$("btnSave").addEventListener("click", async () => {
+  const payload = {
+    title: state.title || "Untitled Paper",
+    authors: state.authors,
+    template: state.template,
+    sections: state.sections
+  };
+
+  try {
+    const res = await fetch("/save-paper", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    alert(data.message);
+  } catch (err) {
+    alert("Error saving paper!");
+  }
+});
+  </script>
+</body>
+</html>

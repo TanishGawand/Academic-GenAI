@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plagiarism Checker | Academia GenAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .glass {
+      backdrop-filter: blur(20px);
+      background: rgba(20, 20, 20, 0.6);
+      border: 1px solid rgba(255, 215, 0, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-[#0D0D0D] via-[#1A1A1A] to-[#2C1810] min-h-screen flex flex-col text-white">
+
+  <!-- Navbar -->
+  <nav class="bg-black bg-opacity-60 text-white px-6 py-4 flex justify-between items-center shadow-lg border-b border-[#FFD700]/20">
+    <div class="text-xl font-bold flex items-center space-x-2 text-[#FFD700]">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 2L2 6l8 4 8-4-8-4zm0 5.5L3.5 6 10 9.5 16.5 6 10 7.5zM2 8v6l8 4 8-4V8l-8 4-8-4z" />
+      </svg>
+      <span>Academia GenAI</span>
+    </div>
+    <div class="space-x-6 text-sm font-semibold">
+      <a href="/" class="hover:text-[#FFD700] transition">HOME</a>
+      <a href="/create-paper" class="hover:text-[#FFD700] transition">CREATE PAPER</a>
+      <a href="/myspace" class="hover:text-[#FFD700] transition">MYSPACE</a>
+      <a href="/plagiarism" class="hover:text-[#FFD700] transition">PLAGIARISM</a>
+    </div>
+  </nav>
+
+  <!-- Main Upload Area -->
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="glass rounded-2xl shadow-2xl p-10 text-center max-w-xl w-full">
+      <h2 class="text-3xl font-extrabold mb-6 text-[#FFD700]"> Plagiarism Checker </h2>
+      <p class="mb-4 text-[#E6D5B8]">Upload your academic document to check for originality.</p>
+
+      <!-- Upload Form -->
+      <form id="plagiarismForm" enctype="multipart/form-data" class="space-y-4">
+        <input type="file" name="file" id="fileInput" accept=".pdf,.doc,.docx,.txt"
+          class="block w-full text-sm bg-black/40 border border-[#B8860B] rounded-md px-4 py-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FFD700] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#FFD700] file:text-black hover:file:bg-[#B8860B]">
+        
+        <button type="submit" class="bg-[#FFD700] hover:bg-[#B8860B] text-black font-bold px-6 py-2 rounded-xl transition shadow-lg">
+          🔍 Check Plagiarism
+        </button>
+      </form>
+
+      <!-- Result Display -->
+      <div id="result" class="mt-6 text-sm bg-black/40 border border-[#FFD700]/20 p-4 rounded-lg max-h-60 overflow-y-auto shadow-inner text-left hidden"></div>
+    </div>
+  </main>
+
+  <script>
+  document.getElementById("plagiarismForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById("fileInput");
+    const resultDiv = document.getElementById("result");
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    resultDiv.classList.remove("hidden");
+    resultDiv.innerHTML = "⏳ Checking for plagiarism...";
+
+    try {
+      const response = await fetch("/check-plagiarism", {
+        method: "POST",
+        body: formData
+      });
+      const data = await response.json();
+
+      // Assuming backend returns: { "plagiarism": 42 } (percentage)
+      if (data.plagiarism !== undefined) {
+        const plagiarism = data.plagiarism;
+
+        if (plagiarism > 30) {
+          resultDiv.innerHTML = `
+            <div class="text-red-400 font-semibold">
+              ⚠️ Plagiarism Detected: ${plagiarism}%<br>
+              Please make appropriate changes in the paper before submission.
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <div class="text-green-400 font-semibold">
+              ✅ Plagiarism Check Passed: ${plagiarism}%<br>
+              Your paper looks good to go!
+            </div>
+          `;
+        }
+      } else {
+        resultDiv.innerHTML = "⚠️ Invalid response from server.";
+      }
+
+    } catch (err) {
+      resultDiv.innerHTML = "❌ Error: " + err.message;
+    }
+  });
+</script>
+</body>
+</html>
