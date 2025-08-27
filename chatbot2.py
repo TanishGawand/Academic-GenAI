@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, render_template, send_file
 from flask_cors import CORS
-import pandas as pd
 import random
 import docx
 import json
@@ -11,27 +10,28 @@ from werkzeug.utils import secure_filename
 import os
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-import re
-from rapidfuzz import fuzz
+
+# === NEW IMPORTS ===
+from search_engine import parse_query, hybrid_search
 
 app = Flask(__name__)
 CORS(app)
 
-# Load Excel once
-df = pd.read_excel("research.xlsx", header=1)
-df.columns = df.columns.str.strip()  # Clean column names
-
 PAPERS_FILE = "saved_papers.json"
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def load_papers():
+# ===== Helper functions for user-created papers =====
+def load_user_papers():
     if os.path.exists(PAPERS_FILE):
         with open(PAPERS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     return []
 
 
-def save_papers(data):
+def save_user_papers(data):
     with open(PAPERS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -92,7 +92,7 @@ def save_paper():
     if not paper:
         return jsonify({"message": "Invalid paper data"}), 400
 
-    papers = load_papers()
+    papers = load_user_papers()
 
     paper_entry = {
         "id": len(papers) + 1,
@@ -102,14 +102,14 @@ def save_paper():
     }
 
     papers.append(paper_entry)
-    save_papers(papers)
+    save_user_papers(papers)
 
     return jsonify({"message": f"Paper '{paper_entry['title']}' saved successfully!"})
 
 
 @app.route("/get-papers", methods=["GET"])
 def get_papers():
-    papers = load_papers()
+    papers = load_user_papers()
     return jsonify(papers)
 
 
@@ -118,97 +118,38 @@ def myspace_page():
     return render_template("myspace.html")
 
 
+# ====== 🔑 MAIN CHAT ENDPOINT (uses hybrid search engine) ======
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
-    question = data.get("question", "").strip().lower()
+    question = data.get("question", "").strip()
 
     if not question:
         return jsonify({"answer": "Please enter a valid question."}), 400
 
-    matched_papers = []
+    filters = parse_query(question)
+    results = hybrid_search(filters, question)
 
-    # --- Step 1: Extract Year from Question ---
-    years_in_q = re.findall(r"\b(?:19|20)\d{2}\b", question)
-    year_query = years_in_q[0] if years_in_q else None
-
-    # --- Step 2: Fuzzy Teacher Name match ---
-    teacher_name = None
-    teacher_scores = []
-    for _, row in df.iterrows():
-        row_teacher = str(row.get("First Author Name", "")).strip().lower()
-        if not row_teacher:
-            continue
-        score = fuzz.partial_ratio(row_teacher, question)
-        teacher_scores.append((score, row_teacher))
-
-    if teacher_scores:
-        best_score, best_name = max(teacher_scores, key=lambda x: x[0])
-        if best_score >= 70:  # threshold
-            teacher_name = best_name
-
-    # --- Step 3: Filter Rows ---
-    for _, row in df.iterrows():
-        row_teacher = str(row.get("First Author Name", "")).strip().lower()
-
-        # Normalize year
-        cell_year = row.get("Year", "")
-        if pd.notna(cell_year):
-            try:
-                row_year = str(int(float(cell_year)))
-            except Exception:
-                row_year = str(cell_year).strip()
-        else:
-            row_year = ""
-
-        teacher_match = bool(teacher_name and row_teacher == teacher_name)
-
-        # Year match
-        year_match = False
-        if year_query:
-            year_match = (row_year == year_query)
-        elif row_year and row_year in question:
-            year_match = True
-
-        # Final condition
-        if teacher_name and year_query:
-            condition = teacher_match and year_match
-        elif teacher_name:
-            condition = teacher_match
-        elif year_query:
-            condition = year_match
-        else:
-            condition = False
-
-        if condition:
-            title = row.get("Article Title", "N/A")
-            authors = row.get("First Author Name", "N/A")
-            journal = row.get("Journal Name", "N/A")
-            doi = row.get("DOI", "")
-            alt_link = row.get("Article Link if DOI is not present", "")
-            link = doi if pd.notna(doi) and doi else alt_link or "N/A"
-
-            matched_papers.append(
+    if results:
+        formatted = []
+        for paper in results:
+            link = paper.get("doi") or paper.get("alt_link") or "N/A"
+            formatted.append(
                 f"""
-                <strong>Title:</strong> {title}<br>
-                <strong>Authors:</strong> {authors}<br>
-                <strong>Journal:</strong> {journal}<br>
-                <strong>Year:</strong> {row_year}<br>
+                <strong>Title:</strong> {paper.get('title','N/A')}<br>
+                <strong>Authors:</strong> {paper.get('first_author','N/A')}<br>
+                <strong>Journal:</strong> {paper.get('journal','N/A')}<br>
+                <strong>Year:</strong> {paper.get('year','N/A')}<br>
+                <strong>Score:</strong> {paper.get('_score',0)}<br>
                 <strong>Link:</strong> <a href="{link}" target="_blank">{link}</a><br><br>
                 """
             )
-
-    if matched_papers:
-        return jsonify({"answer": "".join(matched_papers)})
+        return jsonify({"answer": "".join(formatted)})
 
     return jsonify({"answer": "No matching papers found."})
 
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-
+# ====== Plagiarism Check (simulated) ======
 @app.route("/plagirism")
 def plagiarism_page():
     return render_template("plagirism.html")
@@ -227,7 +168,6 @@ def check_plagiarism():
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
-    # --- Step 1: Extract text depending on file type ---
     text = ""
     if filename.endswith(".txt"):
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
@@ -241,11 +181,10 @@ def check_plagiarism():
             for page in reader.pages:
                 text += page.extract_text() or ""
 
-    # --- Step 2: Simulate plagiarism detection ---
     plagiarism_percentage = random.randint(5, 75)
-
     return jsonify({"plagiarism": plagiarism_percentage})
 
 
 if __name__ == "__main__":
+    # Ensure templates exist (index.html, create_paper.html, plagirism.html)
     app.run(debug=True, port=5000)
