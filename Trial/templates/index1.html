@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Research Info</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f5f6fa;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    input {
+      width: 70%;
+      padding: 10px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #result {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Teacher Research Info Finder</h1>
+    <div>
+      <input type="text" id="teacherInput" placeholder="Enter teacher's name">
+      <button onclick="searchTeacher()">Search</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function searchTeacher() {
+      const teacher = document.getElementById("teacherInput").value.trim();
+      const resultDiv = document.getElementById("result");
+
+      if (!teacher) {
+        resultDiv.innerHTML = "<p style='color:red;'>Please enter a name.</p>";
+        return;
+      }
+
+      resultDiv.innerHTML = "<p>Searching...</p>";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ teacher })
+        });
+
+        const data = await response.json();
+        resultDiv.innerHTML = data.answer;
+      } catch (error) {
+        resultDiv.innerHTML = "<p style='color:red;'>Error fetching data.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
